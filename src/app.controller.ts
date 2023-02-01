@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Patch,
   Post,
   Render,
@@ -12,6 +13,7 @@ import {
 import { DataSource } from 'typeorm';
 import { AppService } from './app.service';
 import { RegisterDto } from './register.dto';
+import { ChangeUserDto } from './changeuser.dto';
 import User from './user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -61,7 +63,31 @@ export class AppController {
     return user;
   }
 
-
   @Patch('/users/:id')
-  async 
+  async updateUser(
+    @Param('id') id: number,
+    @Body() changeuserDto: ChangeUserDto,
+  ) {
+    if (!changeuserDto.email || !changeuserDto.profilePicture) {
+      throw new BadRequestException('All fields are required');
+    }
+    if (!changeuserDto.email.includes('@')) {
+      throw new BadRequestException('Email must contain a @ character');
+    }
+    if (
+      !changeuserDto.profilePicture.startsWith('http://') ||
+      changeuserDto.profilePicture.startsWith('https://')
+    ) {
+      throw new BadRequestException('URL is not correct');
+    }
+
+    const userRepo = this.dataSource.getRepository(User);
+    const user = userRepo.findOneBy({ id: id });
+    user.email = changeuserDto.email;
+    user.profilePictureURL = changeuserDto.profilePicture;
+    await userRepo.save(user);
+
+    return user;
+
+  }
 }
