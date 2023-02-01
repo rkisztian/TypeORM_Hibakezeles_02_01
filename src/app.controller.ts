@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Patch,
   Post,
   Render,
   UnprocessableEntityException,
@@ -59,4 +60,8 @@ export class AppController {
 
     return user;
   }
+
+
+  @Patch('/users/:id')
+  async 
 }
